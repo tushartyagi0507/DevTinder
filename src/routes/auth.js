@@ -58,7 +58,7 @@ authRouter.post("/login", async function (req, res) {
 
     const passwordCheck = await bcrypt.compare(password, user.password);
     if (!passwordCheck) {
-      throw new Error("Invalid crednetials");
+      throw new Error("Invalid credentials");
     }
 
     const token = jwt.sign(

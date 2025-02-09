@@ -9,9 +9,9 @@ const profileRouter = Router();
 profileRouter.get("/profile", userAuth, function (req, res) {
   try {
     const user = req.user;
-    res.status(200).json({ user });
+    res.status(200).json({ data: user });
   } catch (e) {
-    res.status(400).json({ message: e.message });
+    res.status(401).json({ message: e.message });
   }
 });
 
