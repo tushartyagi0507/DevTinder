@@ -33,12 +33,16 @@ userRouter.get("/connections", userAuth, async function (req, res) {
   try {
     const user = req.user;
     const allconnections = await ConnectionRequestModel.find({
-      $or: [{ toUserId: user._id }, { fromUserId: user._id }],
+      $or: [
+        { toUserId: user._id, status: "accepted" },
+        { fromUserId: user._id, status: "accepted" },
+      ],
     })
       .populate("fromUserId", [
         "FirstName",
         "LastName",
         "photoUrl",
+        "gender",
         "about",
         "age",
       ])
@@ -46,6 +50,7 @@ userRouter.get("/connections", userAuth, async function (req, res) {
         "FirstName",
         "LastName",
         "photoUrl",
+        "gender",
         "about",
         "age",
       ]);
@@ -69,7 +74,6 @@ userRouter.get("/connections", userAuth, async function (req, res) {
 userRouter.get("/feed", userAuth, async function (req, res) {
   try {
     const user = req.user;
-
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit || 0;
@@ -77,16 +81,19 @@ userRouter.get("/feed", userAuth, async function (req, res) {
     limit = limit > 50 ? 50 : limit;
 
     // we would hide the user that he has already connected with. either he sent the request or received the request
-    const connectedUsers = await ConnectionRequestModel.find({
-      $and: [{ $or: [{ toUserId: user._id }, { fromUserId: user._id }] }],
-    }).select("toUserId fromUserId");
+    try {
+      const connectedUsers = await ConnectionRequestModel.find({
+        $and: [{ $or: [{ toUserId: user._id }, { fromUserId: user._id }] }],
+      }).select("toUserId fromUserId");
 
-    if (!connectedUsers || connectedUsers.length === 0) {
       const hideConnections = new Set();
-      connectedUsers.forEach((entry) => {
-        hideConnections.add(entry.toUserId.toString());
-        hideConnections.add(entry.fromUserId.toString());
-      });
+      if (connectedUsers && connectedUsers.length > 0) {
+        // Only process when connections exist
+        connectedUsers.forEach((entry) => {
+          hideConnections.add(entry.toUserId.toString());
+          hideConnections.add(entry.fromUserId.toString());
+        });
+      }
 
       const users = await UserModel.find({
         $and: [
@@ -94,17 +101,20 @@ userRouter.get("/feed", userAuth, async function (req, res) {
           { _id: { $ne: user._id } },
         ],
       })
-        .select(["FirstName", "LastName", "photoUrl", "about", "age"])
+        .select(["FirstName", "LastName", "photoUrl", "about", "age", "gender"])
         .skip(skip)
         .limit(limit);
 
       if (!users || users.length === 0) {
-        return res.status(400).send({ message: "No user found" });
+        return res.json({ data: "No user found" });
       }
       res.status(200).json({
         message: "Users found",
         data: users,
       });
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+      throw error;
     }
   } catch (e) {
     res.status(500).send({ message: e.message });

@@ -57,7 +57,7 @@ requestRouter.post(
       }
       res
         .status(200)
-        .send({ message: "Request sent successfully", data: request });
+        .json({ message: "Request sent successfully", data: request });
     } catch (e) {
       res.status(500).send({ message: e.message });
     }
