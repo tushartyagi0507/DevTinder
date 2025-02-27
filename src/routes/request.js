@@ -18,7 +18,7 @@ requestRouter.post(
       // making sure that user can only send interested request or ignore request
       const allowedStatus = ["interested", "ignored"];
       if (!allowedStatus.includes(status)) {
-        return res.status(400).send({ message: "Invalid status" });
+        return res.status(400).json({ message: "Invalid status" });
       }
 
       // make sure that the toUserId is valid and it is there in our DB
@@ -53,18 +53,18 @@ requestRouter.post(
         status,
       });
       if (!request) {
-        return res.status(400).send({ message: "Request not sent" });
+        return res.status(400).json({ message: "Request not sent" });
       }
       res
         .status(200)
         .json({ message: "Request sent successfully", data: request });
     } catch (e) {
-      res.status(500).send({ message: e.message });
+      res.status(500).json({ message: e.message });
     }
   }
 );
 
-requestRouter.get(
+requestRouter.post(
   "/request/review/:status/:requestId",
   userAuth,
   async function (req, res) {
@@ -75,7 +75,7 @@ requestRouter.get(
       //checking the status
       const allowedStatus = ["accepted", "rejected"];
       if (!allowedStatus.includes(status)) {
-        return res.status(400).send({ message: "Invalid status" });
+        return res.status(400).json({ message: "Invalid status" });
       }
 
       const connectionRequest = await ConnectionRequestModel.findOne({
@@ -84,15 +84,15 @@ requestRouter.get(
         status: "interested",
       });
       if (!connectionRequest) {
-        return res.status(400).send({ message: "Request not found" });
+        return res.status(400).json({ message: "Request not found" });
       }
       connectionRequest.status = status;
 
       const data = await connectionRequest.save();
 
-      res.status(200).send({ message: "Request reviewed successfully", data });
+      res.status(200).json({ message: "Request reviewed successfully", data });
     } catch (e) {
-      res.status(500).send({ message: e.message });
+      res.status(500).json({ message: e.message });
     }
   }
 );

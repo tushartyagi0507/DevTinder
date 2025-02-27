@@ -21,11 +21,11 @@ userRouter.get("/requests/received", userAuth, async function (req, res) {
     ]);
 
     if (!requests || requests.length === 0) {
-      return res.status(400).send({ message: "No request found" });
+      return res.status(404).json({ message: "No request found" });
     }
-    res.status(200).send({ message: "Request found", data: requests });
+    res.status(200).json({ message: "Request found", data: requests });
   } catch (e) {
-    res.status(500).send({ message: e.message });
+    res.status(500).json({ message: e.message });
   }
 });
 
@@ -56,7 +56,7 @@ userRouter.get("/connections", userAuth, async function (req, res) {
       ]);
 
     if (!allconnections || allconnections.length === 0) {
-      return res.status(400).send({ message: "No connection found" });
+      return res.status(200).json({ message: "No connection found" });
     }
     const data = allconnections.map((connection) => {
       if (connection.fromUserId._id.toString() === user._id.toString()) {
@@ -65,9 +65,9 @@ userRouter.get("/connections", userAuth, async function (req, res) {
       return connection.fromUserId;
     });
 
-    res.status(200).send({ message: "Connection found", data: allconnections });
+    res.status(200).json({ message: "Connection found", data: data });
   } catch (e) {
-    res.status(500).send({ message: e.message });
+    res.status(500).json({ message: e.message });
   }
 });
 
@@ -117,7 +117,7 @@ userRouter.get("/feed", userAuth, async function (req, res) {
       throw error;
     }
   } catch (e) {
-    res.status(500).send({ message: e.message });
+    res.status(500).json({ message: e.message });
   }
 });
 

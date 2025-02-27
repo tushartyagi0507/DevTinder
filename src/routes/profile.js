@@ -71,7 +71,7 @@ profileRouter.patch(
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
       await user.save();
-      res.send(200).json({ message: "Password changed successfully" });
+      res.json(200).json({ message: "Password changed successfully" });
     } catch (e) {
       res.status(500).json({ message: e.message });
     }
