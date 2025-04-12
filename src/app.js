@@ -7,6 +7,8 @@ const { requestRouter } = require("./routes/request");
 const { userRouter } = require("./routes/user");
 const cors = require("cors");
 const path = require("path");
+const http = require("http");
+const { initializeSocket } = require("./utils/socket");
 
 const app = express();
 
@@ -31,6 +33,9 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/user", userRouter);
 
-app.listen(3000, function () {
+const server = http.createServer(app);
+initializeSocket(server);
+
+server.listen(3000, function () {
   console.log("Server is running on port 3000");
 });
